@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <color name="colorPrimary">#577FE8</color>
+    <color name="colorPrimaryDark">#3F51B5</color>
+    <color name="colorAccent">#FF4081</color>
+
+    <color name="jdcolorCommonBtn">@color/colorPrimary</color>
+    <color name="jdcolorCommonPressBtn">@color/colorPrimaryDark</color>
+    <color name="jdcolorWhite">#ffffff</color>
+
+    <color name="jdcolorBarBg">#799FFA</color>
+
+    <color name="jdtextFirGray">#252525</color>
+    <color name="jdtextSecGray">#696969</color>
+    <color name="jdtextThrGray">#838383</color>
+
+    <color name="jdroundNoneColor">#cccccc</color>
+    <color name="jdroundHaveLightColor">@color/colorPrimary</color>
+
+    <color name="jdcolorGrayAlpha">#22333333</color>
+
+    <color name="jdcolorDownloadHead">#F5F4F4</color>
+
+</resources>

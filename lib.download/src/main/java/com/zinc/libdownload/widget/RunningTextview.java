@@ -6,7 +6,8 @@ import android.content.Context;
 import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 
-import co.zinc.jdownload.R;
+
+import com.zinc.libdownload.R;
 
 import static com.zinc.libdownload.config.TagConfig.ANIM_DURATION;
 

@@ -10,23 +10,4 @@
         <item name="actionMenuTextColor">@android:color/white</item><!--右边文字颜色 优先级高与 textColorPrimary-->
     </style>
 
-    <style name="JDCommonBtn" parent="AppTheme">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">45dp</item>
-        <item name="android:layout_margin">10dp</item>
-        <item name="android:background">@drawable/jdselect_common_btn</item>
-        <item name="android:textColor">@color/jdcolorWhite</item>
-        <item name="android:textSize">13sp</item>
-        <item name="android:gravity">center</item>
-    </style>
-
-    <style name="TranslucentNoTitle" parent="AppTheme">
-        <item name="android:windowNoTitle">true</item>
-        <item name="android:background">@color/jdcolorGrayAlpha</item>
-        <item name="android:windowBackground">@color/jdcolorGrayAlpha</item>
-        <item name="android:windowFullscreen">false</item>
-        <item name="android:colorBackgroundCacheHint">@null</item>
-        <item name="android:windowIsFloating">false</item>
-    </style>
-
 </resources>

@@ -9,7 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import co.zinc.jdownload.R;
+import com.zinc.libdownload.R;
 import com.zinc.libdownload.widget.RoundChart;
 import com.zinc.libdownload.widget.RunningTextview;
 
