@@ -34,12 +34,21 @@
                 android:layout_height="match_parent"
                 android:layout_centerInParent="true" />
 
-            <com.zinc.libdownload.widget.RunningTextview
-                android:id="@+id/running_textview"
+            <!--<com.zinc.libdownload.widget.RunningTextview-->
+                <!--android:id="@+id/running_textview"-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_centerInParent="true"-->
+                <!--android:text="0"-->
+                <!--android:textColor="@color/colorPrimary"-->
+                <!--android:textSize="27dp" />-->
+            <TextView
+                android:id="@+id/progress_textview"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
                 android:text="0"
+                android:background="@color/jdcolorWhite"
                 android:textColor="@color/colorPrimary"
                 android:textSize="27dp" />
 
@@ -49,8 +58,8 @@
                 android:text="%"
                 android:textColor="@color/colorPrimary"
                 android:textSize="14dp"
-                android:layout_toRightOf="@id/running_textview"
-                android:layout_alignBottom="@id/running_textview"
+                android:layout_toRightOf="@id/progress_textview"
+                android:layout_alignBottom="@id/progress_textview"
                 android:layout_marginBottom="4dp"
                 android:background="@color/jdcolorWhite"
                 />

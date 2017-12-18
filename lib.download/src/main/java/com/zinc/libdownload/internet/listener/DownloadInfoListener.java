@@ -3,23 +3,19 @@ package com.zinc.libdownload.internet.listener;
 import com.zinc.libdownload.internet.bean.DownloadingInfo;
 
 /**
- *
- * @date 创建时间：2017/11/14
  * @author Jiang zinc
+ * @date 创建时间：2017/11/14
  * @description 下载信息的接口
- *
  */
 
 public interface DownloadInfoListener {
 
     /**
-     *
+     * @param downloadingInfo 下载的信息，包括下载的总共包大小，已下载的量，是否已下载完
      * @date 创建时间 2017/11/14
      * @author Jiang zinc
      * @Description 下载进度接口
-     * @param downloadingInfo 下载的信息，包括下载的总共包大小，已下载的量，是否已下载完
      * @version
-     *
      */
     void onProgress(DownloadingInfo downloadingInfo);
 
@@ -44,12 +40,10 @@ public interface DownloadInfoListener {
 //    String getDownloadPath();
 
     /**
-     *
      * @date 创建时间 2017/11/14
      * @author Jiang zinc
      * @Description 获取文件名称前缀
      * @version
-     *
      */
     String getFileNamePrefix();
 

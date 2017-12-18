@@ -8,10 +8,10 @@ import android.support.v7.app.AppCompatDialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.zinc.libdownload.R;
 import com.zinc.libdownload.widget.RoundChart;
-import com.zinc.libdownload.widget.RunningTextview;
 
 /**
  * @author Jiang zinc
@@ -23,7 +23,7 @@ public class DownloadRoundProgressFragment extends AppCompatDialogFragment {
 
     private final String TAG = Integer.toHexString(System.identityHashCode(this));
 
-    private RunningTextview running_textview;
+    private TextView progressTextview;
     private RoundChart round_chart;
 
     public static DownloadRoundProgressFragment newInstance() {
@@ -50,7 +50,7 @@ public class DownloadRoundProgressFragment extends AppCompatDialogFragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        running_textview = view.findViewById(R.id.running_textview);
+        progressTextview = view.findViewById(R.id.progress_textview);
         round_chart = view.findViewById(R.id.round_chart);
 
     }
@@ -59,9 +59,11 @@ public class DownloadRoundProgressFragment extends AppCompatDialogFragment {
         super.show(manager, TAG);
     }
 
-    public void setProgress(int downloaded, int total) {
+    public void setProgress(final int downloaded, final int total) {
         round_chart.setTotal(total).display(downloaded);
-        running_textview.display(downloaded * 100 / total);
+
+        progressTextview.setText(downloaded * 100 / total + "");
+
     }
 
     public void setProgress(long downloaded, long total) {

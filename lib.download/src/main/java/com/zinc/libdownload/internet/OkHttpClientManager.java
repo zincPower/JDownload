@@ -19,7 +19,7 @@ import java.net.URLConnection;
 
 import com.zinc.libdownload.internet.bean.DownloadingInfo;
 import com.zinc.libdownload.internet.listener.DownloadInfoListener;
-import com.zinc.libdownload.internet.progress.ProgressResponseBody;
+
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Headers;
@@ -32,11 +32,9 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 /**
- *
- * @date 创建时间：2017/11/14
  * @author Jiang zinc
+ * @date 创建时间：2017/11/14
  * @description okhttp管理类
- *
  */
 
 public class OkHttpClientManager {
@@ -45,7 +43,7 @@ public class OkHttpClientManager {
     private Handler mDelivery;
     private Gson mGson;
 
-    private ProgressResponseBody.ProgressListener progressListener;
+//    private ProgressResponseBody.ProgressListener progressListener;
 
     private DownloadInfoListener downloadInfoListener;
 
@@ -53,21 +51,22 @@ public class OkHttpClientManager {
 
     private OkHttpClientManager() {
 
-        progressListener = new ProgressResponseBody.ProgressListener() {
-            @Override
-            public void onProgress(long currentBytes, long contentLength, boolean done) {
-                Log.i(TAG, "onProgress: 【currentBytes:" + currentBytes + "】【contentLength:" + contentLength + "】【done:" + done + "】");
-                if (getDownloadInfoListener() != null) {
-                    getDownloadInfoListener().onProgress(new DownloadingInfo(currentBytes, contentLength, done));
-                }
+//        progressListener = new ProgressResponseBody.ProgressListener() {
+//            @Override
+//            public void onProgress(long currentBytes, long contentLength, boolean done) {
+//                Log.i(TAG, "onProgress: 【currentBytes:" + currentBytes + "】【contentLength:" + contentLength + "】【done:" + done + "】");
+//                if (getDownloadInfoListener() != null) {
+//                    getDownloadInfoListener().onProgress(new DownloadingInfo(currentBytes, contentLength, done));
+//                }
+//
+//                if (done) {
+//                    downloadInfoListener = null;
+//                }
+//            }
+//        };
 
-                if (done) {
-                    downloadInfoListener = null;
-                }
-            }
-        };
-
-        mOkHttpClient = getmOkHttpClient(new OkHttpClient(), progressListener);
+//        mOkHttpClient = getmOkHttpClient(new OkHttpClient(), progressListener);
+        mOkHttpClient = getmOkHttpClient(new OkHttpClient());
 
         mDelivery = new Handler(Looper.getMainLooper());
 
@@ -97,7 +96,7 @@ public class OkHttpClientManager {
      * @Description 构建okhttpclient，主要做一些初始化参数
      * @version
      */
-    private OkHttpClient getmOkHttpClient(OkHttpClient client, final ProgressResponseBody.ProgressListener progressListener) {
+    private OkHttpClient getmOkHttpClient(OkHttpClient client) {
 
         Interceptor interceptor = new Interceptor() {
             @Override
@@ -108,7 +107,7 @@ public class OkHttpClientManager {
 
                 //包装响应体并返回
                 return originalResponse.newBuilder()
-                        .body(new ProgressResponseBody(originalResponse.body(), progressListener))
+//                        .body(new ProgressResponseBody(originalResponse.body(), progressListener))
                         .build();
 
             }
@@ -280,14 +279,22 @@ public class OkHttpClientManager {
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
+                long total;
+
+                try {
+                    total = response.body().contentLength();
+                } catch (Exception e) {
+                    sendFailedStringCallback(request, e, callback);
+                    return;
+                }
 
                 File dirFile = new File(destFileDir);
-                if(!dirFile.exists()){
-                    Log.i(TAG, destFileDir+" 文件不存在,进行创建");
+                if (!dirFile.exists()) {
+                    Log.i(TAG, destFileDir + " 文件不存在,进行创建");
                     boolean result = dirFile.mkdirs();
 
-                    if(!result){
-                        Log.i(TAG, destFileDir+" 创建失败");
+                    if (!result) {
+                        Log.i(TAG, destFileDir + " 创建失败");
                     }
                 }
 
@@ -300,17 +307,20 @@ public class OkHttpClientManager {
 
                     is = response.body().byteStream();
 
-                    File file = new File(destFileDir,getFileName(url));
-
-//                    if(!file.exists()){
-//                        file.createNewFile();
-//                    }
+                    File file = new File(destFileDir, getFileName(url));
 
                     fos = new FileOutputStream(file);
 
+                    long sum = 0;
                     while ((len = is.read(buf)) != -1) {
                         fos.write(buf, 0, len);
+                        sum += len;
+                        int progress = (int) (sum * 1.0f / total * 100);
+
+                        DownloadingInfo downloadingInfo = new DownloadingInfo(sum, total, sum >= total);
+                        downloadInfoListener.onProgress(downloadingInfo);
                     }
+
                     fos.flush();
 
                     //如果下载文件成功，第一个参数为文件的绝对路径
@@ -506,12 +516,10 @@ public class OkHttpClientManager {
     }
 
     /**
-     *
      * @date 创建时间 2017/11/14
      * @author Jiang zinc
      * @Description 发送请求
      * @version
-     *
      */
     private void deliveryResult(final ResultCallback callback, Request request) {
         mOkHttpClient.newCall(request).enqueue(new Callback() {

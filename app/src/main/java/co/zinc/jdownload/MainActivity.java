@@ -18,9 +18,11 @@ import com.zinc.libdownload.fragment.DownloadRoundProgressFragment;
 import com.zinc.libdownload.internet.OkHttpClientManager;
 import com.zinc.libdownload.internet.bean.DownloadingInfo;
 import com.zinc.libdownload.internet.listener.DownloadInfoListener;
+import com.zinc.libdownload.internet.progress.ProgressListener;
 import com.zinc.libdownload.testTools.ThreadTimer;
 import com.zinc.libdownload.utils.Arith;
 import com.zinc.libdownload.utils.SystemUtils;
+
 import okhttp3.Request;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, DownloadInfoListener {
@@ -113,7 +115,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         } catch (Exception e) {
             e.printStackTrace();
         }
-        int perInt = (int) (percent * 100);
+        final int perInt = (int) (percent * 100);
 
         Log.i(TagConfig.TAG, "方法【onProgress】: downloadingInfo" + downloadingInfo.toString() + "；percent：" + percent + "；perInt：" + perInt);
 
@@ -123,7 +125,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //            Message message = jWeakHandler.obtainMessage(DOWNLOAD_PROGRESS_CHANGE);
 //            message.obj = perInt;
 //            jWeakHandler.sendMessage(message);
-            downloadRoundProgressFragment.setProgress(perInt, 100);
+
+        this.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                downloadRoundProgressFragment.setProgress(perInt, 100);
+            }
+        });
+
 //        }
 
     }

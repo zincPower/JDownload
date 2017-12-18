@@ -10,6 +10,6 @@ public class TagConfig {
 
     public static final String TAG = "JDownload";
 
-    public static final int ANIM_DURATION = 200;
+    public static final int ANIM_DURATION = 50;
 
 }
