@@ -1,8 +1,16 @@
 package co.zinc.jdownload;
 
+import android.Manifest;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.provider.Settings;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -18,7 +26,6 @@ import com.zinc.libdownload.fragment.DownloadRoundProgressFragment;
 import com.zinc.libdownload.internet.OkHttpClientManager;
 import com.zinc.libdownload.internet.bean.DownloadingInfo;
 import com.zinc.libdownload.internet.listener.DownloadInfoListener;
-import com.zinc.libdownload.internet.progress.ProgressListener;
 import com.zinc.libdownload.testTools.ThreadTimer;
 import com.zinc.libdownload.utils.Arith;
 import com.zinc.libdownload.utils.SystemUtils;
@@ -26,6 +33,9 @@ import com.zinc.libdownload.utils.SystemUtils;
 import okhttp3.Request;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, DownloadInfoListener {
+
+    public static final int INSTALL_PACKAGES_REQUESTCODE = 0x001;
+    public static final int GET_UNKNOWN_APP_SOURCES = 0x002;
 
     public static final String DOWNLOAD_MAIN_PATH = "JFrameTest";
     public static final int DOWNLOAD_PROGRESS_CHANGE = 0x002;
@@ -37,6 +47,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private DownloadRoundProgressFragment downloadRoundProgressFragment;
 
     private JWeakHandler jWeakHandler = new JWeakHandler(this);
+
+    private String absolutePath;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,7 +94,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                 Toast.makeText(MainActivity.this, "下载成功，路径：" + absolutePath, Toast.LENGTH_SHORT).show();
 
                                 downloadRoundProgressFragment.dismiss();
-                                SystemUtils.installAuto(MainActivity.this, new File(absolutePath));
+                                MainActivity.this.absolutePath = absolutePath;
+                                checkIsAndroidO();
                             }
                         });
                 break;
@@ -95,14 +108,63 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             case R.id.btn_show_upload_dialog:
 
+                this.absolutePath = "/storage/emulated/0/JFrameTest/JFrameTest_1513592345040.apk";
+                checkIsAndroidO();
+
+                break;
+        }
+    }
+
+    /**
+     * 判断是否是8.0,8.0需要处理未知应用来源权限问题,否则直接安装
+     */
+    private void checkIsAndroidO() {
+        if (Build.VERSION.SDK_INT >= 26) {
+            boolean b = getPackageManager().canRequestPackageInstalls();
+            if (b) {
+                installApk();
+            } else {
+                //请求安装未知应用来源的权限
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.REQUEST_INSTALL_PACKAGES}, INSTALL_PACKAGES_REQUESTCODE);
+            }
+        } else {
+            installApk();
+        }
+
+    }
+
+    private void installApk() {
+        SystemUtils.installAuto(MainActivity.this, new File(absolutePath));
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch (requestCode) {
+            case INSTALL_PACKAGES_REQUESTCODE:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    installApk();
+                } else {
+                    Toast.makeText(this, "请开启安装权限", Toast.LENGTH_SHORT).show();
+                    Uri packageURI = Uri.parse("package:" + this.getPackageName());
+                    Intent intent = new Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES, packageURI);
+                    startActivityForResult(intent, GET_UNKNOWN_APP_SOURCES);
+                }
                 break;
         }
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch (requestCode) {
+            case GET_UNKNOWN_APP_SOURCES:
+                checkIsAndroidO();
+                break;
 
+            default:
+                break;
+        }
     }
 
     @Override
