@@ -35,14 +35,16 @@ import okhttp3.Request;
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, DownloadInfoListener {
 
     public static final int INSTALL_PACKAGES_REQUESTCODE = 0x001;
-    public static final int GET_UNKNOWN_APP_SOURCES = 0x002;
+    public static final int GET_UNKNOWN_APP_SOURCES = 0x003;
 
+    public static final String INSTALL_PATH = "InstallPath";
     public static final String DOWNLOAD_MAIN_PATH = "JFrameTest";
     public static final int DOWNLOAD_PROGRESS_CHANGE = 0x002;
 
     private TextView btn_download;
     private TextView btn_show_download_dialog;
     private TextView btn_show_upload_dialog;
+    private TextView btn_install_by_process;
 
     private DownloadRoundProgressFragment downloadRoundProgressFragment;
 
@@ -58,10 +60,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         btn_download = findViewById(R.id.btn_download);
         btn_show_download_dialog = findViewById(R.id.btn_show_download_dialog);
         btn_show_upload_dialog = findViewById(R.id.btn_show_upload_dialog);
+        btn_install_by_process = findViewById(R.id.btn_install_by_process);
 
         btn_download.setOnClickListener(this);
         btn_show_download_dialog.setOnClickListener(this);
         btn_show_upload_dialog.setOnClickListener(this);
+        btn_install_by_process.setOnClickListener(this);
 
         downloadRoundProgressFragment = DownloadRoundProgressFragment.newInstance();
         downloadRoundProgressFragment.setCancelable(false);
@@ -79,7 +83,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 ThreadTimer.progess = 0;
                 new Thread(new ThreadTimer(jWeakHandler)).start();
 
-                OkHttpClientManager.downloadAsyn("http://woyunbao-1253685439.file.myqcloud.com/app/aoyun/201709/aoyun_128_v2.5.128.20170926_debug.apk",
+                OkHttpClientManager.downloadAsyn("http://woyunbao-1253685439.cosgz.myqcloud.com/app/aoyunbao_debug/2.7/app-release.apk",
                         getDownloadMainPath(),
                         new OkHttpClientManager.ResultCallback<String>() {
                             @Override
@@ -112,6 +116,37 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 checkIsAndroidO();
 
                 break;
+
+            case R.id.btn_install_by_process:
+
+                OkHttpClientManager.getInstance().setDownloadInfoListener(this);
+
+                downloadRoundProgressFragment.show(getSupportFragmentManager());
+
+                ThreadTimer.progess = 0;
+                new Thread(new ThreadTimer(jWeakHandler)).start();
+
+                OkHttpClientManager.downloadAsyn("http://woyunbao-1253685439.cosgz.myqcloud.com/app/aoyunbao_debug/2.7/app-release.apk",
+                        getDownloadMainPath(),
+                        new OkHttpClientManager.ResultCallback<String>() {
+                            @Override
+                            public void onError(Request request, Exception e) {
+                                e.printStackTrace();
+                                Toast.makeText(MainActivity.this, "下载失败", Toast.LENGTH_SHORT).show();
+                            }
+
+                            @Override
+                            public void onResponse(String absolutePath) {
+                                Log.i("文件下载", "onResponse: " + absolutePath);
+                                Toast.makeText(MainActivity.this, "下载成功，路径：" + absolutePath, Toast.LENGTH_SHORT).show();
+
+                                downloadRoundProgressFragment.dismiss();
+                                MainActivity.this.absolutePath = absolutePath;
+                                checkIsAndroidO();
+                            }
+                        });
+
+                break;
         }
     }
 
@@ -134,7 +169,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void installApk() {
-        SystemUtils.installAuto(MainActivity.this, new File(absolutePath));
+
+        if (Build.VERSION.SDK_INT >= 24 && Build.VERSION.SDK_INT < 26) { //7.x系统
+            Intent myServiceIntent = new Intent(MainActivity.this, MyService.class);
+            myServiceIntent.putExtra(INSTALL_PATH, absolutePath);
+            startService(myServiceIntent);
+            finish();
+        } else {
+            SystemUtils.installAuto(MainActivity.this, new File(absolutePath));
+            finish();
+        }
+
     }
 
     @Override
